@@ -48,7 +48,7 @@ def main():
     if len(r) < 2:
         print("⚠️ Veo menos de 2 lectores. Conecta 2 (o más) y vuelve a ejecutar.")
         print("Lectores detectados:", r)
-        return
+        #return
 
     print("Lectores detectados:")
     for i, rd in enumerate(r, 1):
