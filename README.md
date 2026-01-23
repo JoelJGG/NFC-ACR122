@@ -21,3 +21,11 @@ Dentro de la página, accede a la pestaña **Downloads**.
 
 ## Descarga de aplicación para ver los registros del lector 
 🔗 [https://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader/](https://www.acs.com.hk/en/utility-tools/)
+
+
+
+## UID De los diferentes objetos:
+
+### JEEP: B1492CA3
+### PRINCE: 41552CA3
+### BATMAN:  D1472CA3
