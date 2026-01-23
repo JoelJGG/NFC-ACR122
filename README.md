@@ -18,3 +18,6 @@ Dentro de la página, accede a la pestaña **Downloads**.
 > ⚠️ Nota: El modelo ACR122U está marcado como *End of Life*, pero los drivers siguen estando disponibles y funcionan correctamente.
 
 ---
+
+## Descarga de aplicación para ver los registros del lector 
+🔗 [https://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader/](https://www.acs.com.hk/en/utility-tools/)
