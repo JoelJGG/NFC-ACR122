@@ -5,6 +5,8 @@ from smartcard.System import readers
 from smartcard.CardMonitoring import CardMonitor, CardObserver
 from smartcard.Exceptions import CardConnectionException
 from smartcard.util import toHexString
+from writeConditions import writeValor
+
 
 GET_UID_APDU = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 
@@ -84,6 +86,7 @@ class Observer(CardObserver):
                 if uid:
                     alias = self.register_uid_if_needed(uid)
                     print(f"[INSERT] {reader_name}  UID={uid}  Nombre={alias}")
+                    writeValor(alias)
                 else:
                     print(f"[INSERT] {reader_name}  (UID no disponible)")
             except CardConnectionException:
