@@ -29,3 +29,6 @@ Dentro de la página, accede a la pestaña **Downloads**.
 ### JEEP: B1492CA3
 ### PRINCE: 41552CA3
 ### BATMAN:  D1472CA3
+
+# Instalar la libreria para leer las tarjetas
+## pip install pyscard
