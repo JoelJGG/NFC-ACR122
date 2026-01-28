@@ -1,18 +1,18 @@
 import time
 import json
 import os
+
 from smartcard.System import readers
 from smartcard.CardMonitoring import CardMonitor, CardObserver
 from smartcard.Exceptions import CardConnectionException
 from smartcard.util import toHexString
-from writeConditions import writeValor
 
+from writeConditions import writeValor
 
 GET_UID_APDU = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ALIAS_FILE = os.path.join(BASE_DIR, "aliases.json")
-
 
 
 def load_aliases(path=ALIAS_FILE):
@@ -35,9 +35,7 @@ def load_aliases(path=ALIAS_FILE):
         return {}
 
 
-
 def save_aliases(aliases, path=ALIAS_FILE):
-    # Guardado “bonito” y estable
     with open(path, "w", encoding="utf-8") as f:
         json.dump(aliases, f, ensure_ascii=False, indent=2, sort_keys=True)
 
@@ -58,6 +56,14 @@ class Observer(CardObserver):
         super().__init__()
         self.aliases = aliases
 
+        # Mapa por ATR para emparejar INSERT/REMOVE
+        # key = (reader_name, tuple(card.atr))
+        self.present = {}
+
+        # Fallback si el ATR no empareja: última tarjeta conocida por lector
+        # key = reader_name
+        self.last_by_reader = {}
+
     def register_uid_if_needed(self, uid):
         if uid in self.aliases:
             return self.aliases[uid]
@@ -75,6 +81,7 @@ class Observer(CardObserver):
     def update(self, observable, actions):
         added, removed = actions
 
+        # ---------- INSERT ----------
         for card in added:
             reader_name = getattr(card.reader, "name", str(card.reader))
 
@@ -86,17 +93,44 @@ class Observer(CardObserver):
                 if uid:
                     alias = self.register_uid_if_needed(uid)
                     print(f"[INSERT] {reader_name}  UID={uid}  Nombre={alias}")
-                    writeValor(alias)
+
+                    atr_key = (reader_name, tuple(card.atr))
+                    info = {"uid": uid, "alias": alias, "atr": toHexString(card.atr)}
+
+                    self.present[atr_key] = info
+                    self.last_by_reader[reader_name] = info
                 else:
                     print(f"[INSERT] {reader_name}  (UID no disponible)")
+
             except CardConnectionException:
                 print(f"[INSERT] {reader_name}  (no pude conectar)")
             except Exception as e:
                 print(f"[INSERT] {reader_name}  (error: {e})")
 
+        # ---------- REMOVE (TU TRIGGER) ----------
         for card in removed:
             reader_name = getattr(card.reader, "name", str(card.reader))
-            print(f"[REMOVE] {reader_name}")
+            atr_key = (reader_name, tuple(card.atr))
+
+            info = self.present.pop(atr_key, None)
+
+            # Fallback: si no coincide por ATR, usa la última por lector
+            if info is None:
+                info = self.last_by_reader.get(reader_name)
+
+            if info:
+                uid = info["uid"]
+                alias = info["alias"]
+                print(f"[REMOVE] {reader_name}  UID={uid}  Nombre={alias}")
+
+                # ✅ TRIGGER: se disparará AL QUITAR la tarjeta
+                try:
+                    writeValor(alias)
+                    print(f"📝 XML actualizado con: {alias}")
+                except Exception as e:
+                    print(f"📝 Error escribiendo XML: {e}")
+            else:
+                print(f"[REMOVE] {reader_name}  (tarjeta desconocida)")
 
 
 def main():
