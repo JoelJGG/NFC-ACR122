@@ -32,3 +32,5 @@ Dentro de la página, accede a la pestaña **Downloads**.
 
 # Instalar la libreria para leer las tarjetas
 ## pip install pyscard
+
+# Configurar el volumen del sistema a 0 en el mezcaldor de volumen 
