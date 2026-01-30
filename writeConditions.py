@@ -37,4 +37,5 @@ def writeValor(texto: str, path: str = None, condition_id: str = "4"):
     condition.set("tstamp", str(int(time.time())))
 
     tree.write(path, encoding="utf-8", xml_declaration=True)
+    time.sleep(20)
     return True
