@@ -35,11 +35,6 @@ def load_aliases(path=ALIAS_FILE):
         return {}
 
 
-def save_aliases(aliases, path=ALIAS_FILE):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(aliases, f, ensure_ascii=False, indent=2, sort_keys=True)
-
-
 def read_uid(card_connection):
     """Lee UID usando la conexión ya abierta. Devuelve string HEX o None."""
     try:
@@ -64,19 +59,11 @@ class Observer(CardObserver):
         # key = reader_name
         self.last_by_reader = {}
 
-    def register_uid_if_needed(self, uid):
-        if uid in self.aliases:
-            return self.aliases[uid]
-
-        print(f"\n🆕 UID nueva detectada: {uid}")
-        name = input("Asigna un nombre para esta UID (ENTER para 'Desconocido'): ").strip()
-        if not name:
-            name = "Desconocido"
-
-        self.aliases[uid] = name
-        save_aliases(self.aliases)
-        print(f"✅ Guardado: {uid} = {name}\n")
-        return name
+    def get_alias(self, uid: str) -> str:
+        """Devuelve alias si existe, si no 'Desconocido' (SIN guardar nada)."""
+        if not uid:
+            return "Desconocido"
+        return self.aliases.get(uid.upper(), "Desconocido")
 
     def update(self, observable, actions):
         added, removed = actions
@@ -91,7 +78,7 @@ class Observer(CardObserver):
                 uid = read_uid(conn)
 
                 if uid:
-                    alias = self.register_uid_if_needed(uid)
+                    alias = self.get_alias(uid)
                     print(f"[INSERT] {reader_name}  UID={uid}  Nombre={alias}")
 
                     atr_key = (reader_name, tuple(card.atr))
@@ -138,7 +125,7 @@ def main():
     if aliases:
         print(f"📦 Aliases cargados: {len(aliases)} (desde {ALIAS_FILE})")
     else:
-        print(f"📦 Sin aliases previos (se crearán en {ALIAS_FILE})")
+        print(f"📦 Sin aliases previos (no se crearán nuevos)")
 
     r = readers()
     if len(r) < 1:
