@@ -7,6 +7,7 @@ LINUX_PATH = "/opt/Admira/share/conditions/biomax.xml"
 
 # 🔥 variable global: recuerda el último valor escrito
 _last_valor_guardado = None
+_last_write_time = 0
 
 def writeValor(texto: str, path: str = None, condition_id: str = "4"):
     """
@@ -18,9 +19,10 @@ def writeValor(texto: str, path: str = None, condition_id: str = "4"):
     global _last_valor_guardado
 
     nuevo = str(texto)
+    ahora = time.time()
 
     # ✅ si es igual al último guardado, no hacemos nada
-    if _last_valor_guardado == nuevo:
+    if _last_valor_guardado == nuevo and (ahora - _last_write_time) < 10:
         return False
 
     if path is None:
@@ -48,7 +50,8 @@ def writeValor(texto: str, path: str = None, condition_id: str = "4"):
     condition.set("tstamp", str(int(time.time())))
 
     tree.write(path, encoding="utf-8", xml_declaration=True)
+    
 
-    # ✅ actualizamos el último valor escrito
     _last_valor_guardado = nuevo
+    _last_write_time = ahora
     return True
